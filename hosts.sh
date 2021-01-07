@@ -34,7 +34,7 @@ update_base() {
     for u in $URLS ; do
         printf "fetching $u...\n"
         printf "# $u\n" >> base/hosts
-        wget "$u" -O - >> base/hosts 2>/dev/null || die "couldn't download from $u"
+        wget "$u" -O - 2> /dev/null | tr -d '\015' >> base/hosts || die "couldn't download from $u"
         printf "\n\n" >> base/hosts
     done
 }
