@@ -21,7 +21,7 @@ hosts: select unselect $(HOSTS)
 	printf "# this section is the custom header, you can modify it in header/hosts\n\n" >> $@
 	cat header/hosts >> $@
 	printf "\n# this section is a generated concatenation of tracking/malware websites, ads servers and time consooming websites\n\n" >> $@
-	sed -n '/[ \t]localhost/d;s/^127\.0\.0\.1/0.0.0.0/;/^0.0.0.0 /p' < tmp | sort | uniq >> $@
+	sed -n '/[ \t]localhost/d;s/^127\.0\.0\.1/0.0.0.0/;s/^0.0.0.0 *\t*/0.0.0.0 /;/^0.0.0.0 /p' < tmp | sort | uniq >> $@
 	rm tmp
 
 clean:
