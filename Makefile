@@ -1,25 +1,18 @@
 PREFIX=/etc
 
-EXTENSIONS = $(shell xargs -i find {} -type f -name hosts < select | grep -v -f unselect)
-DYNEXT = $(shell xargs -i find {} -type d -empty < select | grep -v -f unselect)
+HOSTS = $(shell xargs -i find modules/{} -type f -name hosts < select | grep -v -f unselect)
+GENSCRIPTS = $(shell xargs -i find modules/{} -type f -name genhosts < select | grep -v -f unselect)
+GENHOSTS = $(patsubst %/genhosts,%/hosts,$(GENSCRIPTS))
 
-EXTENSIONS += $(addsuffix /hosts,$(DYNEXT))
+HOSTS += $(GENHOSTS)
 
 all: hosts
 
-base/hosts: base/urls
-	for u in $$(cat base/urls) ; do \
-		printf "fetching $$u...\n"; \
-		wget "$$u" -O - 2> /dev/null | tr -d '\015' >> base/hosts || echo "couldn't download from $$u"; \
-		printf "\n\n" >> base/hosts; \
-	done
+%/hosts: %/genhosts
+	$< > $@
 
-extensions/google/search/hosts:
-	# violent carpet ban of all international google search domains
-	wget -O - https://www.google.com/supported_domains 2>/dev/null | sed 's/\.\(.*\)$$/0.0.0.0 \1\n0.0.0.0 www.\1/g' > $@
-
-hosts: base/hosts select unselect $(EXTENSIONS)
-	for i in $(EXTENSIONS) ; do \
+hosts: select unselect $(HOSTS)
+	for i in $(HOSTS) ; do \
 		printf "adding $$i\n"; \
 		cat "$$i" >> tmp; \
 	done
@@ -32,7 +25,7 @@ hosts: base/hosts select unselect $(EXTENSIONS)
 	rm tmp
 
 clean:
-	rm -f base/hosts hosts extensions/google/search/hosts
+	rm -f hosts $(GENHOSTS)
 
 install: hosts
 	cp hosts $(PREFIX)

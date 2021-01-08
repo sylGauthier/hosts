@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# violent carpet ban of all international google search domains
+wget -O - https://www.google.com/supported_domains 2>/dev/null | sed 's/\.\(.*\)$/0.0.0.0 \1\n0.0.0.0 www.\1/g'

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+DIR="${0%/*}"
+
+for u in $(cat "$DIR/urls") ; do
+    printf "fetching $u...\n" 1>&2
+    wget "$u" -O - 2> /dev/null | tr -d '\015'
+done
